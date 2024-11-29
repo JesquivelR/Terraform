@@ -15,7 +15,12 @@ The main objectives of this project are:
 This README provides a detailed guide on how to execute this project, including the required prerequisites, project structure, and steps to deploy the Dev and QA environments on AWS using Terraform.
 
 ## 2. Technical Overview and Project Structure
-### **1. Project Structure**
+
+### **1. Architecture**
+
+![Alt text](architecture.jpg)
+
+### **2. Project Structure**
 
 ```bash
 web_server_module/
@@ -51,13 +56,13 @@ This project is designed to deploy a scalable and efficient web server infrastru
   - Configures remote state management using an AWS S3 bucket for consistency and collaboration.
   - Outputs the public IP and DNS of the deployed servers for quick reference.
 
-### **2. Modular Approach**
+### **3. Modular Approach**
 The modular approach provides:
 - **Separation of Concerns**: Logical components like EC2, security groups, and key pairs are isolated for clarity.
 - **Reusability**: The `web_server_module` can be reused across multiple environments or projects with minimal changes.
 - **Scalability**: Adding a new environment (e.g., Production) is straightforward by invoking the module with new parameters.
 
-### **3. Why This Structure?**
+### **4. Why This Structure?**
 - **Flexibility**: By parameterizing variables, the same module can be reused across environments with different configurations.
 - **Maintainability**: Isolating resources in separate files ensures that updates or debugging can be performed in a targeted manner.
 - **Scalability**: The modular approach allows easy scaling to add more environments or new server configurations.
