@@ -1,74 +1,59 @@
-# Terraform Projects 🌍
+# Proyectos de Terraform
 
-Welcome to my Terraform projects repository! Here you'll find a collection of infrastructure projects designed to be deployed across multiple cloud providers like **AWS**, **GCP**, and **Azure**.
+Colección de proyectos de infraestructura como código con Terraform. Cada proyecto vive en su propia carpeta, con su README, su configuración y, cuando aplica, módulos reutilizables.
 
----
+## Proyectos
 
-## 📝 **Description**
+| Proyecto | Nube | Descripción |
+|----------|------|-------------|
+| [01-web-server](./AWS/01-web-server) | AWS | Servidor web con Nginx en EC2, security group con SSH y HTTP, par de llaves y dos entornos (dev y qa) a partir de un mismo módulo. El estado remoto va en S3. |
 
-This repository is dedicated to sharing and documenting projects related to **Infrastructure as Code (IaC)** using **Terraform**.  
-Its purpose is to:  
-- Simplify cloud infrastructure deployment.  
-- Foster modularity and reusability for cloud resources.  
-- Provide ready-to-use examples for AWS, GCP, and Azure.  
+## Estructura del repositorio
 
-Each project is structured with:  
-- A `README.md` file detailing the project objectives and instructions.  
-- Terraform configuration files (`.tf`) and modules for efficient deployments.  
-- Examples for different environments like Dev, QA, and Production.  
+```text
+.
+├── README.md
+└── AWS/
+    └── 01-web-server/
+        ├── README.md
+        ├── architecture.jpg
+        ├── main.tf                  # entornos dev y qa y backend S3
+        └── web_server_module/       # EC2, security group, llaves y salidas
+```
 
----
+## Requisitos
 
-## 📂 **Projects**
+- Terraform 1.10 o superior.
+- AWS CLI con credenciales configuradas (`aws configure`) y permisos sobre EC2, pares de llaves, security groups y el bucket de estado.
+- Un par de llaves SSH generado en local; las instrucciones están en el README de cada proyecto.
 
-### **AWS**  
-#### 📌 Project 1: [Deploying a Web Server on AWS](./AWS/01-web-server)
-- **Description:**  
-  This project uses Terraform to deploy a web server on AWS, leveraging a custom module to ensure flexibility, reusability, and maintainability. The web server runs **Nginx** and is secured with a security group allowing SSH and HTTP access.  
-- **Features:**  
-  - Modular structure for independent environments (e.g., Dev, QA).  
-  - Easily customizable configurations for different use cases.  
+## Cómo usarlo
 
-*(More AWS projects coming soon...)*  
-
----
-
-### **GCP**  
-#### 📌 Projects Coming Soon!  
-
----
-
-### **Azure**  
-#### 📌 Projects Coming Soon!  
-
----
-
-## 🚀 **How to Use This Repository**
-
-1. Clone this repository:  
+1. Clona el repositorio:
    ```bash
    git clone https://github.com/JesquivelR/Terraform.git
    cd Terraform
    ```
-2. Navigate to the desired cloud provider folder (AWS, GCP, or Azure):
-    ```bash
-    cd AWS  # Or replace with GCP or Azure
-    ```
-3. Initialize Terraform:
-    ```bash
-    terraform init
-    ```
-4. Customize `variables.tf` or `terraform.tfvars` as needed for your environment.
-5. Deploy the infrastructure:
-    ```bash
-    terraform apply
-    ```
-6. Destroy the infrastructure:
-    ```bash
-    terraform destroy
-    ```
-## **🛠 Contributions**
-Do you have ideas, suggestions, or improvements? Feel free to open an Issue or submit a Pull Request!
-This repository is constantly evolving, and your contributions are welcome.
+2. Entra a la carpeta del proyecto que quieras desplegar. Terraform se ejecuta desde ahí, no desde la raíz:
+   ```bash
+   cd AWS/01-web-server
+   ```
+3. Ajusta el backend y las variables según el README del proyecto, y luego:
+   ```bash
+   terraform init
+   terraform plan
+   terraform apply
+   ```
+4. Cuando termines de probar, elimina los recursos para evitar costos:
+   ```bash
+   terraform destroy
+   ```
 
-## **Thank You for Visiting! Happy Terraforming! 🌟**
+## Costos
+
+Los proyectos crean recursos reales en AWS (instancias EC2 y su tráfico de red). Una instancia `t3.medium` encendida todo el mes cuesta del orden de decenas de dólares; si es solo una prueba, destruye los recursos al terminar.
+
+## Contacto
+
+- GitHub: [JesquivelR](https://github.com/JesquivelR)
+- LinkedIn: [esquivelrodriguez123](https://linkedin.com/in/esquivelrodriguez123)
