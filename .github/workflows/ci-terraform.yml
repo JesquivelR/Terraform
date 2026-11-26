@@ -1,0 +1,40 @@
+name: ci-terraform
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    name: fmt, validate y tflint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+      - uses: terraform-linters/setup-tflint@90f302c255ef959cbfb4bd10581afecdb7ece3e6 # v4
+      - name: terraform fmt
+        run: terraform fmt -check -recursive
+      - name: terraform validate
+        working-directory: AWS/01-web-server
+        run: |
+          terraform init -backend=false -input=false
+          terraform validate
+      - name: tflint
+        working-directory: AWS/01-web-server
+        run: |
+          tflint --init
+          tflint --recursive
+
+  checkov:
+    name: Checkov
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: bridgecrewio/checkov-action@b782b35c8411ff565b881fba67ceebdb426d7dc4 # v12
+        with:
+          directory: AWS
+          framework: terraform
