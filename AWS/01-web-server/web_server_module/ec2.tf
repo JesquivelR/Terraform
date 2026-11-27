@@ -30,7 +30,7 @@ resource "aws_instance" "web-server" {
   tags = {
     Name        = var.server_name
     Environment = var.environment
-    Owner       = "esquivelrodriguez123@gmail.com"
+    Owner       = var.owner
     Team        = "Devops"
   }
 }

@@ -6,7 +6,7 @@ resource "aws_security_group" "web-server-sg" {
   tags = {
     Name        = "${var.server_name}-sg"
     Environment = var.environment
-    Owner       = "esquivelrodriguez123@gmail.com"
+    Owner       = var.owner
     Team        = "Devops"
   }
 }

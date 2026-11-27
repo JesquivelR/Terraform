@@ -42,6 +42,7 @@ No modules.
 | <a name="input_ami_id"></a> [ami\_id](#input\_ami\_id) | ID de la AMI para la instancia EC2 | `string` | `"ami-0453ec754f44f9a4a"` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | Entorno de la aplicación (por ejemplo Dev o QA) | `string` | `"Dev"` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | Tipo de instancia EC2 | `string` | `"t3.micro"` | no |
+| <a name="input_owner"></a> [owner](#input\_owner) | Responsable que se registra en la etiqueta Owner de los recursos | `string` | `"devops"` | no |
 | <a name="input_server_name"></a> [server\_name](#input\_server\_name) | Nombre del servidor web | `string` | `"web-server"` | no |
 | <a name="input_ssh_allowed_cidrs"></a> [ssh\_allowed\_cidrs](#input\_ssh\_allowed\_cidrs) | Rangos CIDR con acceso SSH al servidor. Por defecto solo una red privada de ejemplo; cámbialo por tu IP, por ejemplo ["203.0.113.10/32"] | `list(string)` | <pre>[<br/>  "10.0.0.0/8"<br/>]</pre> | no |
 

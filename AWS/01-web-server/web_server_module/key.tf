@@ -8,7 +8,7 @@ resource "aws_key_pair" "web-server-ssh" {
   tags = {
     Name        = "${var.server_name}-ssh"
     Environment = var.environment
-    Owner       = "esquivelrodriguez123@gmail.com"
+    Owner       = var.owner
     Team        = "Devops"
   }
 }
