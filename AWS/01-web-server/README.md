@@ -146,7 +146,7 @@ Dos instancias `t3.medium` encendidas todo el mes cuestan del orden de varias de
 
 ## Consideraciones de seguridad
 
-El security group limita SSH a `ssh_allowed_cidrs` (por defecto una red privada de ejemplo: cámbiala por tu IP) y deja HTTP (80) público a propósito, con la omisión `CKV_AWS_260` documentada en `sg.tf`. La salida se limita a los puertos 80 y 443. Queda pendiente asignar un rol IAM a la instancia (CKV2_AWS_41) y quitar el correo personal de las etiquetas.
+El security group limita SSH a `ssh_allowed_cidrs` (por defecto una red privada de ejemplo: cámbiala por tu IP) y deja HTTP (80) público a propósito, con la omisión `CKV_AWS_260` documentada en `sg.tf`. La salida se limita a los puertos 80 y 443. La instancia usa un rol IAM (`iam.tf`) con la política administrada `AmazonSSMManagedInstanceCore`, de modo que se puede administrar con Systems Manager sin SSH. Queda pendiente quitar el correo personal de las etiquetas.
 
 ## Limpieza
 

@@ -11,6 +11,7 @@ resource "aws_instance" "web-server" {
                 EOF
   key_name               = aws_key_pair.web-server-ssh.key_name
   vpc_security_group_ids = [aws_security_group.web-server-sg.id]
+  iam_instance_profile   = aws_iam_instance_profile.web-server.name
 
   # Solo IMDSv2: exige token de sesión para leer los metadatos de la instancia
   metadata_options {
