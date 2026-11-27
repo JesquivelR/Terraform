@@ -18,7 +18,7 @@ Cada entorno crea los mismos recursos:
 | Recurso | Archivo | Función |
 |---------|---------|---------|
 | `aws_instance` | `ec2.tf` | Instancia que instala y arranca Nginx con un script de `user_data`. |
-| `aws_security_group` | `sg.tf` | Permite entrada por SSH (22) y HTTP (80) y toda la salida. |
+| `aws_security_group` y reglas | `sg.tf` | SSH (22) solo desde `ssh_allowed_cidrs`, HTTP (80) público y salida limitada a HTTP y HTTPS. |
 | `aws_key_pair` | `key.tf` | Registra la llave pública para entrar por SSH. |
 | Salidas | `outputs.tf` | Exponen la IP y el DNS públicos de la instancia. |
 
@@ -146,7 +146,7 @@ Dos instancias `t3.medium` encendidas todo el mes cuestan del orden de varias de
 
 ## Consideraciones de seguridad
 
-El security group abre SSH (22) y HTTP (80) a `0.0.0.0/0`, y la instancia no fuerza IMDSv2 ni cifra el volumen raíz. Es aceptable para una prueba corta, pero no para un entorno real: restringe el rango de SSH a tu IP o usa Session Manager. Estos hallazgos se corrigen en la tarea de Checkov de esta rama.
+El security group limita SSH a `ssh_allowed_cidrs` (por defecto una red privada de ejemplo: cámbiala por tu IP) y deja HTTP (80) público a propósito, con la omisión `CKV_AWS_260` documentada en `sg.tf`. La salida se limita a los puertos 80 y 443. Queda pendiente asignar un rol IAM a la instancia (CKV2_AWS_41) y quitar el correo personal de las etiquetas.
 
 ## Limpieza
 

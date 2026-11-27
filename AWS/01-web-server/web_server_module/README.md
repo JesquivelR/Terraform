@@ -30,6 +30,10 @@ No modules.
 | [aws_instance.web-server](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) | resource |
 | [aws_key_pair.web-server-ssh](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/key_pair) | resource |
 | [aws_security_group.web-server-sg](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_vpc_security_group_egress_rule.http](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_ingress_rule.http](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
+| [aws_vpc_security_group_ingress_rule.ssh](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 
 ## Inputs
 
@@ -39,6 +43,7 @@ No modules.
 | <a name="input_environment"></a> [environment](#input\_environment) | Entorno de la aplicación (por ejemplo Dev o QA) | `string` | `"Dev"` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | Tipo de instancia EC2 | `string` | `"t3.micro"` | no |
 | <a name="input_server_name"></a> [server\_name](#input\_server\_name) | Nombre del servidor web | `string` | `"web-server"` | no |
+| <a name="input_ssh_allowed_cidrs"></a> [ssh\_allowed\_cidrs](#input\_ssh\_allowed\_cidrs) | Rangos CIDR con acceso SSH al servidor. Por defecto solo una red privada de ejemplo; cámbialo por tu IP, por ejemplo ["203.0.113.10/32"] | `list(string)` | <pre>[<br/>  "10.0.0.0/8"<br/>]</pre> | no |
 
 ## Outputs
 

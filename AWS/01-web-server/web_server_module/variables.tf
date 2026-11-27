@@ -22,3 +22,9 @@ variable "environment" {
   type        = string
   default     = "Dev"
 }
+
+variable "ssh_allowed_cidrs" {
+  description = "Rangos CIDR con acceso SSH al servidor. Por defecto solo una red privada de ejemplo; cámbialo por tu IP, por ejemplo [\"203.0.113.10/32\"]"
+  type        = list(string)
+  default     = ["10.0.0.0/8"]
+}
