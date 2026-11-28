@@ -1,238 +1,162 @@
-# Deploying a Web Server with Terraform
+# Servidor web en AWS con Terraform
 
-## 1. Introduction
+Despliega un servidor web con Nginx en una instancia EC2 usando un módulo propio de Terraform. El mismo módulo se invoca dos veces desde `main.tf` para crear dos entornos independientes, `dev` y `qa`, cada uno con su instancia, su security group y su par de llaves SSH.
 
-This project uses Terraform to deploy a web server on AWS, leveraging a custom module to ensure flexibility, reusability, and maintainability. The web server is configured to run Nginx and secured with a security group that allows SSH and HTTP access.
+## Objetivo
 
-The modular structure of the project allows for the definition of independent environments, such as Dev and QA, each with its specific configurations while sharing common elements through the module.
+- Automatizar la creación de instancias EC2 configuradas como servidores web.
+- Reutilizar un solo módulo para varios entornos y cambiar solo sus parámetros.
+- Guardar el estado de Terraform en un backend remoto en S3.
+- Dejar el proceso documentado para que se pueda repetir de principio a fin.
 
-The main objectives of this project are:
+## Arquitectura
 
-- Automate the creation of EC2 instances configured as web servers.
-- Standardize the use of AWS resources through reusable modules.
-- Clearly document the process to make it easily replicable and maintainable by other teams.
+![Arquitectura del servidor web](architecture.jpg)
 
-This README provides a detailed guide on how to execute this project, including the required prerequisites, project structure, and steps to deploy the Dev and QA environments on AWS using Terraform.
+Cada entorno crea los mismos recursos:
 
-## 2. Technical Overview and Project Structure
+| Recurso | Archivo | Función |
+|---------|---------|---------|
+| `aws_instance` | `ec2.tf` | Instancia que instala y arranca Nginx con un script de `user_data`. |
+| `aws_security_group` y reglas | `sg.tf` | SSH (22) solo desde `ssh_allowed_cidrs`, HTTP (80) público y salida limitada a HTTP y HTTPS. |
+| `aws_key_pair` | `key.tf` | Registra la llave pública para entrar por SSH. |
+| Salidas | `outputs.tf` | Exponen la IP y el DNS públicos de la instancia. |
 
-### **1. Architecture**
+## Estructura
 
-![Alt text](architecture.jpg)
-
-### **2. Project Structure**
-
-```bash
-web_server_module/
-├── ec2.tf          # EC2 instance configuration
-├── key.tf          # SSH key pair configuration
-├── outputs.tf      # Module outputs
-├── provider.tf     # AWS provider configuration
-├── sg.tf           # Security group definition
-├── variables.tf    # Module variables declaration
-main.tf             # Module and environment configuration
-```
-This project is designed to deploy a scalable and efficient web server infrastructure in AWS using Terraform. Below, we describe the technical aspects of the project and explain the rationale behind its modular structure.
-
-#### **Key Files in the Module:**
-1. **`ec2.tf`**:
-  - Creates the EC2 instance for the web server using the provided AMI and instance type.
-  - Configures the server with a startup script (`user_data`) to install and start Nginx.
-2. **`key.tf`**:  
-  - Manages SSH key pairs for secure access to the EC2 instance.
-3. **`sg.tf`**:  
-  - Configures Security Group rules to allow inbound traffic for:
-     - **SSH (port 22)**: For remote server management.
-     - **HTTP (port 80)**: To serve web traffic.
-   - Allows all outbound traffic for general communication.
-4. **`provider.tf`**:  
-  - Configures the AWS region to deploy the resources.
-5. **`outputs.tf`**:  
-  - Exposes useful information like the server's public IP and DNS for easy access.
-6. **`variables.tf`**:  
-  - Defines configurable parameters (e.g., AMI ID, instance type, environment).
-#### **Root Module (`main.tf`):**
-  - Integrates the `web_server_module` for multiple environments (e.g., Development and QA).
-  - Configures remote state management using an AWS S3 bucket for consistency and collaboration.
-  - Outputs the public IP and DNS of the deployed servers for quick reference.
-
-### **3. Modular Approach**
-The modular approach provides:
-- **Separation of Concerns**: Logical components like EC2, security groups, and key pairs are isolated for clarity.
-- **Reusability**: The `web_server_module` can be reused across multiple environments or projects with minimal changes.
-- **Scalability**: Adding a new environment (e.g., Production) is straightforward by invoking the module with new parameters.
-
-### **4. Why This Structure?**
-- **Flexibility**: By parameterizing variables, the same module can be reused across environments with different configurations.
-- **Maintainability**: Isolating resources in separate files ensures that updates or debugging can be performed in a targeted manner.
-- **Scalability**: The modular approach allows easy scaling to add more environments or new server configurations.
-
-This structure reflects best practices in Infrastructure as Code (IaC) and promotes efficiency, consistency, and scalability across deployments.
-
-
-## 3. Prerequisites
-
-Before starting, ensure you have the following tools and configurations:
-
-- **Terraform**: Version 1.10.0 or higher. Install Terraform by following the [official guide](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli).
-
-- **AWS CLI**: Properly configured with your AWS account credentials. You can install it using the [AWS CLI documentation](https://docs.aws.amazon.com/cli/).
-
-    - Use aws configure to set up your credentials and default region.
-
-- **SSH Key Pair**:
-
-    - Ensure you have generated a public/private SSH key pair before running Terraform. This is required to access the EC2 instances via SSH.
-
-Generate the key pair using the following command:
-
-```bash
-ssh-keygen -t rsa -b 2048 -f "web-server-dev-key"
-ssh-keygen -t rsa -b 2048 -f "web-server-qa-key"
-```
-Place the web-server-key.pub file in the root of the project directory.
-
-- **S3 Bucket for Backend**:
-
-    - Terraform's state file is stored in an S3 bucket. Ensure the bucket exists and has proper permissions. Update the backend configuration in main.tf with the bucket name, key, and region.
-
-## 4. Pre-Deployment Configuration
-
-Follow these steps to configure your environment before deploying resources with Terraform:
-
-### 1. Set Up AWS CLI
-Make sure your AWS CLI is configured with an IAM user that has sufficient permissions to manage:
-- EC2 instances
-- Key pairs
-- Security groups
-- S3 buckets
-
-Run the following command to configure the AWS CLI:
-```bash
-aws configure
-```
-You will be prompted to provide:
-
-- AWS Access Key ID
-- AWS Secret Access Key
-- Default region (e.g., us-east-1)
-
-### 2. Generate SSH Keys
-To access the EC2 instance via SSH, generate a public/private SSH key pair.
-
-Run the following command to create the key pair:
-
-```bash
-ssh-keygen -t rsa -b 2048 -f "web-server-dev-key"
-ssh-keygen -t rsa -b 2048 -f "web-server-qa-key"
+```text
+.
+├── main.tf                    # backend S3 y los módulos dev y qa
+└── web_server_module/
+    ├── ec2.tf                 # instancia EC2 con Nginx
+    ├── key.tf                 # par de llaves SSH
+    ├── outputs.tf             # IP y DNS públicos
+    ├── provider.tf            # proveedor AWS y región
+    ├── sg.tf                  # security group
+    └── variables.tf           # parámetros del módulo
 ```
 
-Make sure the web-server-key.pub file is placed in the root directory of the project, as Terraform will use it.
+### Módulo `web_server_module`
 
-### 3. Verify or Create S3 Bucket for Terraform Backend
-Terraform uses an S3 bucket to store its state file. Ensure the bucket exists and has proper permissions.
+| Variable | Descripción | Valor por defecto |
+|----------|-------------|-------------------|
+| `ami_id` | AMI de la instancia. Debe traer `yum` para que el script instale Nginx (por ejemplo Amazon Linux). | `ami-0453ec754f44f9a4a` |
+| `instance_type` | Tipo de instancia. | `t3.micro` |
+| `server_name` | Nombre del servidor; también prefija el security group y el par de llaves. | `web-server` |
+| `environment` | Etiqueta del entorno. | `Dev` |
 
-If the bucket does not exist, you can create it using the AWS CLI:
+Salidas: `server_public_ip` y `server_public_dns`.
+
+### Raíz (`main.tf`)
+
+- Configura el backend S3 para el estado remoto.
+- Invoca el módulo para `dev` (`web-server-dev`) y para `qa` (`web-server-qa`), ambos con `t3.medium`.
+- Publica las salidas `server_dev_ip`, `server_dev_dns`, `server_qa_ip` y `server_qa_dns`.
+
+### Por qué un módulo
+
+- **Reutilización:** agregar un entorno nuevo es una invocación más del módulo con otros parámetros.
+- **Mantenimiento:** cada tipo de recurso vive en su archivo, así que un cambio o una depuración tocan un solo lugar.
+- **Consistencia:** dev y qa no pueden divergir por accidente porque comparten el mismo código.
+
+## Requisitos
+
+- Terraform 1.10 o superior ([guía de instalación](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)).
+- AWS CLI con credenciales configuradas (`aws configure`) de un usuario o rol con permisos sobre EC2, pares de llaves, security groups y el bucket del estado ([documentación](https://docs.aws.amazon.com/cli/)).
+- Un par de llaves SSH generado en local.
+- Un bucket de S3 para el estado remoto.
+
+## Preparación
+
+### 1. Generar el par de llaves
+
+El módulo lee la llave pública con `file("web-server-key.pub")`, una ruta relativa al directorio desde el que se ejecuta Terraform. Genera la llave dentro de `AWS/01-web-server`:
 
 ```bash
-aws s3api create-bucket --bucket <bucket_name> --region us-east-1
+cd AWS/01-web-server
+ssh-keygen -t rsa -b 4096 -f web-server-key
 ```
 
-Enable versioning on the bucket for better state management:
+Los dos entornos usan esta misma llave. Los archivos de llaves no se versionan: el `.gitignore` del repositorio ya los excluye, y la llave privada nunca debe subirse.
+
+### 2. Crear el bucket del estado
+
+Si no tienes un bucket, créalo y activa el versionado para poder recuperar versiones anteriores del estado:
 
 ```bash
-aws s3api put-bucket-versioning --bucket <bucket_name> --versioning-configuration Status=Enabled
+aws s3api create-bucket --bucket <nombre-del-bucket> --region us-east-1
+aws s3api put-bucket-versioning \
+  --bucket <nombre-del-bucket> \
+  --versioning-configuration Status=Enabled
 ```
 
-Update the backend block in the main.tf file with your S3 bucket name, region, and key path:
+Luego edita el bloque `backend` de `main.tf` con tu bucket, la ruta del estado y la región:
 
-```bash
+```hcl
 terraform {
   backend "s3" {
-    bucket = "<bucket_name>"
-    key    = "<path_in_bucket>/terraform.tfstate"
+    bucket = "<nombre-del-bucket>"
+    key    = "<ruta>/terraform.tfstate"
     region = "us-east-1"
   }
 }
 ```
-### 4. Edit Variables (Optional)
-You can modify the default values in the variables.tf file to match your requirements. For example:
 
-- `ami_id`: Specify the desired Amazon Machine Image (AMI).
-- `instance_type`: Define the instance type, such as t3.micro or t3.medium.
-- `server_name`: Set the server's name (e.g., web-server-dev).
-- `environment`: Choose the environment (e.g., Dev, QA, Prod).
+### 3. Ajustar los parámetros (opcional)
 
-### 5. Install Terraform Providers
-Run the following command to initialize Terraform and download required providers:
-```bash
-terraform init
-```
+Cambia en `main.tf` la AMI, el tipo de instancia, el nombre o el entorno de cada módulo. Los valores por defecto de `web_server_module/variables.tf` aplican a lo que no se indique. La región está fijada en `web_server_module/provider.tf` (`us-east-1`).
 
-## 5. How to Use This Project
-Step-by-step instructions to execute the project:
+## Despliegue
 
-### 1. Clone the repository:
+Desde `AWS/01-web-server`:
 
 ```bash
-git clone https://github.com/JesquivelR/Terraform.git
-cd Terraform
-```
-### 2. Initialize Terraform:
-```bash
-terraform init
-```
-### 3. Review the execution plan:
-```bash
-terraform plan
-```
-### 4. Apply the plan to deploy resources:
-
-```bash
-terraform apply
+terraform init      # descarga el proveedor y configura el backend
+terraform plan      # revisa los recursos que se crearán
+terraform apply     # crea la infraestructura
 ```
 
-## 6. Testing the Web Server with `curl`
+## Probar el servidor
 
-After deploying the infrastructure, follow these steps to test the functionality of the web server using `curl`:
+Consulta las salidas:
 
-### Step 1: Obtain the Public IP or DNS of the Server
-Run the following command to retrieve the public IP or DNS of the EC2 instance:
 ```bash
 terraform output
 ```
 
-Note down the values for:
+Prueba HTTP en cada entorno con la IP que aparece en `server_dev_ip` o `server_qa_ip`:
 
-`server_public_ip`
-
-`server_public_dns`
-
-### Step 2: Test HTTP Access Using curl
-
-Use `curl` to send a request to the web server and verify the response.
-
-**Test with Public IP:**
-
-Replace `<public_ip>` with the actual IP from the Terraform output:
 ```bash
-curl http://<public_ip>
+curl http://<ip-publica>
 ```
 
-If the server is running correctly, you should see the default HTML page served by Nginx.
+Si el servidor está bien, la respuesta es la página de bienvenida de Nginx. El script de `user_data` tarda uno o dos minutos en terminar después de que la instancia pasa a `running`, así que si la primera petición falla, espera y repite.
 
-## 7. Destroying Resources
-To clean up resources and avoid unnecessary costs:
-### 1. Run the following command
+Para entrar por SSH:
+
+```bash
+ssh -i web-server-key ec2-user@<ip-publica>
+```
+
+El usuario `ec2-user` aplica a Amazon Linux; en otra AMI será distinto.
+
+## Costos aproximados
+
+Dos instancias `t3.medium` encendidas todo el mes cuestan del orden de varias decenas de dólares en `us-east-1`, más el tráfico de salida y la IP pública. Si es solo una prueba, destruye los recursos al terminar.
+
+## Consideraciones de seguridad
+
+El security group limita SSH a `ssh_allowed_cidrs` (por defecto una red privada de ejemplo: cámbiala por tu IP) y deja HTTP (80) público a propósito, con la omisión `CKV_AWS_260` documentada en `sg.tf`. La salida se limita a los puertos 80 y 443. La instancia usa un rol IAM (`iam.tf`) con la política administrada `AmazonSSMManagedInstanceCore`, de modo que se puede administrar con Systems Manager sin SSH. Queda pendiente quitar el correo personal de las etiquetas.
+
+## Limpieza
+
 ```bash
 terraform destroy
 ```
-### 2. Confirm the prompt with `yes`.
 
-## Contact Information
-For questions, suggestions, or collaboration, feel free to contact me:
+Confirma con `yes`. El bucket del estado no lo gestiona este proyecto, así que no se borra; elimínalo aparte si ya no lo necesitas.
 
-- **Name**: Jorge Esquivel 
-- **Email**: [esquivelrodriguez123@gmail.com]  
-- **GitHub**: [https://github.com/JesquivelR](https://github.com/JesquivelR)  
-- **LinkedIn**: [https://linkedin.com/in/esquivelrodriguez123](https://linkedin.com/in/esquivelrodriguez123)  
+## Contacto
+
+- GitHub: [JesquivelR](https://github.com/JesquivelR)
+- LinkedIn: [esquivelrodriguez123](https://linkedin.com/in/esquivelrodriguez123)

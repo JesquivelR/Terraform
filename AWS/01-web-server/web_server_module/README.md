@@ -1,0 +1,58 @@
+# Módulo web_server_module
+
+Módulo de Terraform que crea una instancia EC2 con un servidor web, su grupo de seguridad y el par de llaves. Se consume desde `AWS/01-web-server/main.tf` una vez por entorno.
+
+La sección siguiente se genera con `terraform-docs`; no se edita a mano. Para regenerarla:
+
+```bash
+terraform-docs markdown table --output-file README.md --output-mode inject AWS/01-web-server/web_server_module
+```
+
+<!-- BEGIN_TF_DOCS -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.0 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 5.0 |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_instance.web-server](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) | resource |
+| [aws_key_pair.web-server-ssh](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/key_pair) | resource |
+| [aws_security_group.web-server-sg](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_vpc_security_group_egress_rule.http](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_ingress_rule.http](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
+| [aws_vpc_security_group_ingress_rule.ssh](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_ami_id"></a> [ami\_id](#input\_ami\_id) | ID de la AMI para la instancia EC2 | `string` | `"ami-0453ec754f44f9a4a"` | no |
+| <a name="input_environment"></a> [environment](#input\_environment) | Entorno de la aplicación (por ejemplo Dev o QA) | `string` | `"Dev"` | no |
+| <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | Tipo de instancia EC2 | `string` | `"t3.micro"` | no |
+| <a name="input_owner"></a> [owner](#input\_owner) | Responsable que se registra en la etiqueta Owner de los recursos | `string` | `"devops"` | no |
+| <a name="input_server_name"></a> [server\_name](#input\_server\_name) | Nombre del servidor web | `string` | `"web-server"` | no |
+| <a name="input_ssh_allowed_cidrs"></a> [ssh\_allowed\_cidrs](#input\_ssh\_allowed\_cidrs) | Rangos CIDR con acceso SSH al servidor. Por defecto solo una red privada de ejemplo; cámbialo por tu IP, por ejemplo ["203.0.113.10/32"] | `list(string)` | <pre>[<br/>  "10.0.0.0/8"<br/>]</pre> | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_server_public_dns"></a> [server\_public\_dns](#output\_server\_public\_dns) | Nombre DNS público de la instancia EC2 |
+| <a name="output_server_public_ip"></a> [server\_public\_ip](#output\_server\_public\_ip) | Dirección IP pública de la instancia EC2 |
+<!-- END_TF_DOCS -->

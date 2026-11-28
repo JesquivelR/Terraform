@@ -1,10 +1,19 @@
 # tfstate
 terraform {
+  required_version = ">= 1.5.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+
   backend "s3" {
     bucket = "bucket-terraform-jesquivelr"
-    key = "terraform-jesquivelr/terraform.tfstate"
+    key    = "terraform-jesquivelr/terraform.tfstate"
     region = "us-east-1"
-    
+
   }
 }
 
@@ -12,40 +21,40 @@ terraform {
 # Modules 
 # Dev Environment
 module "web_server_dev" {
-    source = "./web_server_module"
+  source = "./web_server_module"
 
-    ami_id = "ami-0453ec754f44f9a4a"
-    instance_type = "t3.medium"
-    server_name = "web-server-dev"
-    environment = "Dev"
+  ami_id        = "ami-0453ec754f44f9a4a"
+  instance_type = "t3.medium"
+  server_name   = "web-server-dev"
+  environment   = "Dev"
 }
 
 # Outputs
 output "server_dev_ip" {
-  description   = "EC2 instance public IP address"
-  value         = module.web_server_dev.server_public_ip
+  description = "EC2 instance public IP address"
+  value       = module.web_server_dev.server_public_ip
 }
 output "server_dev_dns" {
-  description   = "EC2 instance public DNS"
-  value         = module.web_server_dev.server_public_dns
+  description = "EC2 instance public DNS"
+  value       = module.web_server_dev.server_public_dns
 }
 
 # Dev Environment
 module "web_server_qa" {
-    source = "./web_server_module"
+  source = "./web_server_module"
 
-    ami_id = "ami-0453ec754f44f9a4a"
-    instance_type = "t3.medium"
-    server_name = "web-server-qa"
-    environment = "QA"
+  ami_id        = "ami-0453ec754f44f9a4a"
+  instance_type = "t3.medium"
+  server_name   = "web-server-qa"
+  environment   = "QA"
 }
 
 # Outputs
 output "server_qa_ip" {
-  description   = "EC2 instance public IP address"
-  value         = module.web_server_qa.server_public_ip
+  description = "EC2 instance public IP address"
+  value       = module.web_server_qa.server_public_ip
 }
 output "server_qa_dns" {
-  description   = "EC2 instance public DNS"
-  value         = module.web_server_qa.server_public_dns
+  description = "EC2 instance public DNS"
+  value       = module.web_server_qa.server_public_dns
 }

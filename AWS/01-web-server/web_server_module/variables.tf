@@ -1,20 +1,36 @@
 # Variables
 variable "ami_id" {
-  description   = "ID ami for EC2 instance"
-  default       = "ami-0453ec754f44f9a4a" 
+  description = "ID de la AMI para la instancia EC2"
+  type        = string
+  default     = "ami-0453ec754f44f9a4a"
 }
 
 variable "instance_type" {
-  description   = "EC2 instance type"
-  default       = "t3.micro"   
+  description = "Tipo de instancia EC2"
+  type        = string
+  default     = "t3.micro"
 }
 
 variable "server_name" {
-  description   = "Web server name"
-  default       = "web-server"
+  description = "Nombre del servidor web"
+  type        = string
+  default     = "web-server"
 }
 
 variable "environment" {
-  description   = "Aplication environment"
-  default       = "Dev"
+  description = "Entorno de la aplicación (por ejemplo Dev o QA)"
+  type        = string
+  default     = "Dev"
+}
+
+variable "ssh_allowed_cidrs" {
+  description = "Rangos CIDR con acceso SSH al servidor. Por defecto solo una red privada de ejemplo; cámbialo por tu IP, por ejemplo [\"203.0.113.10/32\"]"
+  type        = list(string)
+  default     = ["10.0.0.0/8"]
+}
+
+variable "owner" {
+  description = "Responsable que se registra en la etiqueta Owner de los recursos"
+  type        = string
+  default     = "devops"
 }
